@@ -1,0 +1,76 @@
+---
+title: "Assignment"
+author: "Karan Parekh"
+date: "March 6, 2019"
+output: 
+        html_document:
+                code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rgdal)
+library(leaflet)
+library(mapview)
+library(dplyr)
+
+setwd("C:/Karan/HU/Anly 512/Maps/Pennsylvania_School_Districts")
+
+dist = readOGR(dsn = '.',layer="cb_2016_42_unsd_500k")
+EasternSchools<-read.csv("C:/Karan/HU/Anly 512/EasternSchools.csv")
+```
+
+##Part 1
+
+```{r warning=FALSE, message=FALSE}
+a = EasternSchools %>% filter(magnetSchoolStatus == "Yes")
+b = EasternSchools %>% filter(isCHARTER == "Yes")
+c = EasternSchools %>% filter(magnetSchoolStatus == "No")
+d = EasternSchools %>% filter(isCHARTER == "No")
+
+
+allschools = leaflet(dist) %>% addTiles() %>%
+        addPolygons(weight=1,color="blue",fillOpacity = .1) %>%
+  addCircleMarkers(data = a, radius = 3, color = "red", weight = 3, opacity = 1, fill = TRUE, fillColor = "red", fillOpacity = 0.2, label = ~city) %>%
+  addCircleMarkers(data = b, radius = 3, color = "red", weight = 3, opacity = 1, fill = TRUE, fillColor = "red", fillOpacity = 0.2, label = ~city) %>%
+  addCircleMarkers(data = c, radius = 3, color = "green", weight = 3, opacity = 0.2, fill = TRUE, fillColor = "green", fillOpacity = 0.2, label = ~city) %>%
+  addCircleMarkers(data = d, radius = 3, color = "green", weight = 3, opacity = 0.2, fill = TRUE, fillColor = "green", fillOpacity = 0.2, label = ~city) %>%
+  addLegend("topright", colors = c("red", "green"), labels = c("Speciality School", "Not A Speciality School"), title = "Type of School", opacity = 1)
+allschools
+```
+Part 1 analyses the spread of Magnet and Charter schools and Non Speicality schools inthe state of Pennsylvania. Most of the schools are concentrated in the eastern part of thte state, espeically near the city of Philadelphia. 
+
+## Part 2
+
+```{r warning=FALSE, message=FALSE}
+school_race = leaflet() %>% addTiles() %>%
+  addCircleMarkers(data = c, radius = ~raceWHITE/200, color = "red", weight = 3, opacity = 1, fill = TRUE, fillColor = "red", fillOpacity = 0.2, label = ~city) %>%
+  addCircleMarkers(data = d, radius = ~raceWHITE/200, color = "red", weight = 3, opacity = 1, fill = TRUE, fillColor = "red", fillOpacity = 0.2, label = ~city) %>%
+  addLegend("topright", colors = c("red"), labels = c("White"), title = "Race", opacity = 1)
+school_race
+```
+PArt 2 analyses the areas densely populated with Whites and the concentration of schools in eastern Pennsylvania
+
+## Part 3
+
+```{r warning=FALSE, message=FALSE}
+PSSA = leaflet() %>% addTiles() %>%
+  addCircleMarkers(data = c, radius = ~PctProfELA/20, color = "green", weight = 4, opacity = 1, fill = TRUE, fillColor = "green", fillOpacity = 0.2, label = ~city) %>%
+  addCircleMarkers(data = d, radius = ~PctProfELA/20, color = "green", weight = 4, opacity = 1, fill = TRUE, fillColor = "green", fillOpacity = 0.2, label = ~city) %>%
+  addLegend("topleft", colors = c("green"), labels = c("English Exam"), title = "Proficieny", opacity = 1)
+PSSA
+```
+Part 3 takes into consideration of percentage of students who are proficiency in English language.
+
+
+## Part 4
+
+```{r warning=FALSE, message=FALSE}
+Attendance = leaflet() %>% addTiles() %>%
+  addCircleMarkers(data = c, radius = ~AttendRate/100, color = "yellow", weight = 4, opacity = 1, fill = TRUE, fillColor = "yellow", fillOpacity = 0.2, label = ~city) %>%
+  addCircleMarkers(data = d, radius = ~AttendRate/100, color = "yellow", weight = 4, opacity = 1, fill = TRUE, fillColor = "yellow", fillOpacity = 0.2, label = ~city) %>%
+  addLegend("topleft", colors = c("yellow"), labels = c("Attendance"), title = "Attendance", opacity = 1)
+Attendance
+```
+Part 4 analyses attendance rate across eastern Pennslyvania. 
