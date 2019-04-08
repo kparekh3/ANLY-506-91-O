@@ -4,6 +4,13 @@ This repository is a collection of data, code, and all the figures used in the f
 
 ## Data Description
 
-- Dataset name TBD
-- Source TBD
-- Number of rows and columns TBD
+Dataset name - bikeVendor
+Number of rows and columns - 98 rows x 35 columns
+
+The purpose of the final project is 
+- To perform epicycle analysis
+- To set up questions
+- To perform data analysis
+- To revise the questions (if needed)
+
+
