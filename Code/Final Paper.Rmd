@@ -1,0 +1,153 @@
+---
+title: "Final Paper - ANLY 506 Spring 2019"
+author: "Karan Parekh"
+date: "April 16, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("C:/Users/Karab/Documents/GitHub/ANLY-506-91-O/Data")
+data = read.csv("gapminder.csv")
+
+library(ggplot2)
+library(tidyverse)
+```
+
+## Introduction
+The dataset for the final paper was acquired from https://raw.githubusercontent.com/birdsarah/pydata-nc/master/tutorial/assets/gapminder.csv
+
+The link to the Github project - https://github.com/kparekh3/ANLY-506-91-O
+
+##Understanding the data
+The dataset has 41284 rows and 6 columns
+```{r warning=FALSE, message=FALSE}
+str(data)
+```
+
+```{r warning=FALSE, message=FALSE}
+head(data)
+tail(data)
+summary(data)
+```
+There is a lot of missing data under population since the most of the countries follow decennial census.
+Looking at the structure and summary of the dataset the next step should be to convert Population from  factor to numeric.
+
+##Data preparation
+Relabeling the column header
+```{r warning=FALSE, message=FALSE}
+names(data) <- c("Country", "Year", "Life Exp", "Population", "Income", "Region")
+```
+
+Converting Population from factor to Numeric
+```{r warning=FALSE, message=FALSE}
+data$Population = as.character(data$Population)
+data$Population = as.numeric(data$Population)
+```
+
+## Questions for Exploratory Data Analysis
+1. What is the income distribution across different regions? Does the developed regions like America or Europe have any outliers?
+2. What is the population distribution across different regions?
+3. Is there a relation between Income and Life Expectancy? Does higher income mean better lfe expectancy and vice-versa?
+
+## Question 1
+Filtering the data to focus on the most recent census data, 2010. 
+```{r warning=FALSE, message=FALSE}
+data1 <- data %>% filter(Year == 2010)
+data1$Income = data1$Income/1000
+
+ggplot(data = data1, mapping = aes(x = data1$Region, y = data1$Income, fill= Region)) + 
+  geom_boxplot() + ggtitle("Income distribtuion by Region in 2010") + 
+  xlab("Region") +
+  ylab("Income in thousands") +
+  theme(
+    plot.title = element_text(color="red", size=14, face="bold"),
+    axis.title.x = element_text(color="blue", size=10, face="bold.italic"),
+    axis.title.y = element_text(color="blue", size=10, face="bold.italic")
+  ) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+The biggest outlier in terms of Income is Qatar from Middle East & North Africa. The hypothesis that a country from America or Europe & Central Asia will be the outlier is rejected. 
+Reframing the question to focus further analysis on Middle East & North Africa - How does the Qatar stand compared to different countries from the same region?
+
+```{r warning=FALSE, message=FALSE}
+
+data2= data %>% filter(Region == "Middle East & North Africa") %>% filter(Year == 2010) %>% arrange(desc(Income))
+data2$Income = data2$Income/1000
+data2 = data2[1:10, ]
+
+ggplot(data = data2, aes(x = data2$Country, y = data2$Income, fill=data2$Country)) + 
+  geom_bar(stat = "Identity")+ ggtitle("Income in Middle East & North Africa in 2010") + 
+  xlab("Country") +
+  ylab("Income in thousands") +
+  theme(
+    plot.title = element_text(color="red", size=14, face="bold"),
+    axis.title.x = element_text(color="blue", size=10, face="bold.italic"),
+    axis.title.y = element_text(color="blue", size=10, face="bold.italic")
+  ) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+Plotting a timeseries graph to determine the growth in Income in Qatar
+
+```{r warning=FALSE, message=FALSE}
+data3 = data %>% filter(Country == "Qatar")
+data3$Income = data3$Income/1000
+ggplot(data = data3, aes(x = data3$Year, y = data3$Income)) + 
+  geom_line()+ ggtitle("Income in Qatar 1800-2015") + 
+  xlab("Year") +
+  ylab("Income in thousands") +
+  theme(
+    plot.title = element_text(color="red", size=14, face="bold"),
+    axis.title.x = element_text(color="blue", size=10, face="bold.italic"),
+    axis.title.y = element_text(color="blue", size=10, face="bold.italic")
+  )
+```
+
+Years from 1800 to 1950 show no significant growth in Income. Filtering out the data to show only post 1950 trend
+```{r warning=FALSE, message=FALSE}
+data4 = data %>% filter(Country == "Qatar") %>% filter(Year >= 1950)
+data4$Income = data4$Income/1000
+ggplot(data = data4, aes(x = data4$Year, y = data4$Income)) + 
+  geom_line()+ ggtitle("Income in Qatar 1950-2015") + 
+  xlab("Year") +
+  ylab("Income in thousands") +
+  theme(
+    plot.title = element_text(color="red", size=14, face="bold"),
+    axis.title.x = element_text(color="blue", size=10, face="bold.italic"),
+    axis.title.y = element_text(color="blue", size=10, face="bold.italic")
+  )
+```
+From the above timeseries graph, Qatar's income peaked towards the late 1970s. During late 1980s and early 1990s it saw a steep decline due to geo-political factors. Since then the income in Qatar is rising rapidly.
+
+## Question 2
+```{r warning=FALSE, message=FALSE}
+
+ggplot(data = data1, mapping = aes(x = data1$Region, y = data1$Population, fill= Region)) + 
+  geom_boxplot() + ggtitle("Population distribtuion by Region in 2010") + 
+  xlab("Region") +
+  ylab("Population") +
+  theme(
+    plot.title = element_text(color="red", size=14, face="bold"),
+    axis.title.x = element_text(color="blue", size=10, face="bold.italic"),
+    axis.title.y = element_text(color="blue", size=10, face="bold.italic")
+  ) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+The biggest outlier in terms of Population is India. 
+
+
+## Question 3
+```{r warning=FALSE, message=FALSE}
+ggplot(data = data1, aes(x=data1$Income, y=data1$`Life Exp`)) +
+  geom_point(shape=data1$Region)+ 
+  ggtitle("Relation between Income and Life Expectancy in 2010") + 
+  xlab("Income in thousands") +
+  ylab("Life Expectancy") +
+  theme(
+    plot.title = element_text(color="red", size=14, face="bold"),
+    axis.title.x = element_text(color="blue", size=10, face="bold.italic"),
+    axis.title.y = element_text(color="blue", size=10, face="bold.italic")
+  )
+```
+The above scatter plox shows the relation between Income and Life Expectancy. The poorest country Haiti has the least life expectancy while the richest country Qatar is one of the countries with higer life expectancy. 
